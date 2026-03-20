@@ -13,10 +13,10 @@ function fullClubName(short as Lang.String) as Lang.String {
     if (short.equals("7i"))  { return "7 Iron"; }
     if (short.equals("8i"))  { return "8 Iron"; }
     if (short.equals("9i"))  { return "9 Iron"; }
-    if (short.equals("PW"))  { return "Pitching W"; }
-    if (short.equals("GW"))  { return "Gap W"; }
-    if (short.equals("SW"))  { return "Sand W"; }
-    if (short.equals("LW"))  { return "Lob W"; }
+    if (short.equals("PW"))  { return "P. Wedge"; }
+    if (short.equals("GW"))  { return "G. Wedge"; }
+    if (short.equals("SW"))  { return "S. Wedge"; }
+    if (short.equals("LW"))  { return "L. Wedge"; }
     return short;
 }
 
@@ -78,7 +78,7 @@ class ConfirmationView extends WatchUi.View {
 
         // Distance (large)
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, cardY + (cardH * 0.36).toNumber(), Graphics.FONT_NUMBER_HOT,
+        dc.drawText(cx, cardY + (cardH * 0.36).toNumber(), Graphics.FONT_LARGE,
             _distance.toString(), Graphics.TEXT_JUSTIFY_CENTER);
 
         // "meters" label
