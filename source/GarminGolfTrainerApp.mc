@@ -8,16 +8,9 @@ class GarminGolfTrainerApp extends Application.AppBase {
         AppBase.initialize();
     }
 
-    function onStart(state as Dictionary?) as Void {
+    function getInitialView() {
+        return [new HomeMenuView(), new HomeMenuDelegate()];
     }
-
-    function onStop(state as Dictionary?) as Void {
-    }
-
-    function getInitialView() as [Views] or [Views, InputDelegates] {
-        return [new GarminGolfTrainerView()];
-    }
-
 }
 
 function getApp() as GarminGolfTrainerApp {
