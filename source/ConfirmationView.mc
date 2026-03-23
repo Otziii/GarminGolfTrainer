@@ -58,11 +58,11 @@ class ConfirmationView extends WatchUi.View {
         dc.clear();
 
         // Subtle dark card
-        var cardW = (w * 0.78).toNumber();
-        var cardH = (h * 0.58).toNumber();
+        var cardW = (w * 0.70).toNumber();
+        var cardH = (h * 0.50).toNumber();
         var cardX = cx - cardW / 2;
         var cardY = cy - cardH / 2;
-        dc.setColor(0x1A1A1A, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(0x333333, Graphics.COLOR_TRANSPARENT);
         dc.fillRoundedRectangle(cardX, cardY, cardW, cardH, 18);
 
         // Green top accent bar
@@ -73,18 +73,17 @@ class ConfirmationView extends WatchUi.View {
 
         // Full club name
         dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, cardY + (cardH * 0.18).toNumber(), Graphics.FONT_SMALL,
+        dc.drawText(cx, cardY + (cardH * 0.15).toNumber(), Graphics.FONT_MEDIUM,
             fullClubName(_club), Graphics.TEXT_JUSTIFY_CENTER);
 
         // Distance (large)
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, cardY + (cardH * 0.36).toNumber(), Graphics.FONT_LARGE,
+        dc.drawText(cx, cardY + (cardH * 0.50).toNumber(), Graphics.FONT_LARGE,
             _distance.toString(), Graphics.TEXT_JUSTIFY_CENTER);
 
-        // "meters" label
-        dc.setColor(Graphics.COLOR_GREEN, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
         dc.drawText(cx, cardY + (cardH * 0.80).toNumber(), Graphics.FONT_XTINY,
-            "meters", Graphics.TEXT_JUSTIFY_CENTER);
+            ShotHistory.getUnitText(), Graphics.TEXT_JUSTIFY_CENTER);
     }
 }
 

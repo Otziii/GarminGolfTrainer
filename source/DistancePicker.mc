@@ -3,11 +3,6 @@ import Toybox.Lang;
 import Toybox.Time;
 import Toybox.WatchUi;
 
-// ── Step 2: Distance Picker ───────────────────────────────────────────────────
-// UP   → +5 meters
-// DOWN → -5 meters
-// SELECT → save shot and return to home
-
 class DistancePickerView extends WatchUi.View {
 
     // Public so delegate can mutate it on button presses
@@ -30,9 +25,9 @@ class DistancePickerView extends WatchUi.View {
         dc.clear();
 
         // Club name
-        dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, cy - (h * 0.35).toNumber(), Graphics.FONT_SMALL,
-            _club, Graphics.TEXT_JUSTIFY_CENTER);
+        dc.setColor(Graphics.COLOR_BLUE, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(cx, cy - (h * 0.35).toNumber(), Graphics.FONT_MEDIUM,
+            fullClubName(_club), Graphics.TEXT_JUSTIFY_CENTER);
 
         // Distance number
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
@@ -42,12 +37,12 @@ class DistancePickerView extends WatchUi.View {
         // Unit
         dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
         dc.drawText(cx, cy + (h * 0.15).toNumber(), Graphics.FONT_SMALL,
-            "meters", Graphics.TEXT_JUSTIFY_CENTER);
+            ShotHistory.getUnitText(), Graphics.TEXT_JUSTIFY_CENTER);
 
         // Hints
         dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
         dc.drawText(cx, cy - (h * 0.45).toNumber(), Graphics.FONT_XTINY,
-            "UP +5  |  DOWN -5", Graphics.TEXT_JUSTIFY_CENTER);
+            "UP +1  |  DOWN -1", Graphics.TEXT_JUSTIFY_CENTER);
     }
 }
 
@@ -63,14 +58,14 @@ class DistancePickerDelegate extends WatchUi.BehaviorDelegate {
     }
 
     function onPreviousPage() as Lang.Boolean {
-        _view.distance += 5;
+        _view.distance += 1;
         if (_view.distance > 400) { _view.distance = 400; }
         WatchUi.requestUpdate();
         return true;
     }
 
     function onNextPage() as Lang.Boolean {
-        _view.distance -= 5;
+        _view.distance -= 1;
         if (_view.distance < 5) { _view.distance = 5; }
         WatchUi.requestUpdate();
         return true;

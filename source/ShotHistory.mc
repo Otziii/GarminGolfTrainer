@@ -67,6 +67,10 @@ module ShotHistory {
         return getUnits().equals("metric");
     }
 
+    function getUnitText() as Lang.String {
+        return isMetric() ? "meters" : "yards";
+    }
+
     function clearAll() as Void {
         Application.Storage.deleteValue(KEY);
     }

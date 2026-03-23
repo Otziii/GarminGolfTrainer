@@ -8,7 +8,12 @@ class ClubMenu extends WatchUi.Menu2 {
         var clubs = ["Dr", "3W", "Hy", "4i", "5i", "6i", 
             "7i", "8i", "9i", "PW", "GW", "SW", "LW"];
         for (var i = 0; i < clubs.size(); i++) {
-            addItem(new WatchUi.MenuItem(clubs[i], null, clubs[i], {}));
+            addItem(new WatchUi.MenuItem(
+                fullClubName(clubs[i]), 
+                null, 
+                clubs[i], 
+                {}
+            ));
         }
     }
 }
