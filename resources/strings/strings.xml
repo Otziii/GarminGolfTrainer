@@ -1,3 +1,18 @@
 <strings>
     <string id="AppName">Garmin Golf Trainer</string>
+    <string id="FitShots">Shots</string>
+    <string id="FitSolidShots">Solid Shots</string>
+    <string id="FitSolidPercent">Solid %</string>
+    <string id="FitAverageDistance">Avg Distance</string>
+    <string id="FitSliceCount">Slices</string>
+    <string id="FitPullCount">Pulls</string>
+    <string id="FitDuffCount">Duffs</string>
+    <string id="FitThinCount">Thins</string>
+    <string id="FitShankCount">Shanks</string>
+    <string id="FitAverageHeartRate">Avg HR</string>
+    <string id="FitMaxHeartRate">Max HR</string>
+    <string id="UnitShots">shots</string>
+    <string id="UnitPercent">%</string>
+    <string id="UnitBpm">bpm</string>
+    <string id="UnitDistance">distance</string>
 </strings>

@@ -37,6 +37,13 @@ class ClubDelegate extends WatchUi.Menu2InputDelegate {
         );
     }
 
+    function onBack() as Void {
+        if (_shotData.hasKey("rangeShot")) {
+            getApp().cancelRangeShotPrompt();
+        }
+        WatchUi.popView(WatchUi.SLIDE_RIGHT);
+    }
+
     private function defaultDistanceForClub(club as Lang.String) as Lang.Number {
         if (club.equals("Dr"))  { return 210; }
         if (club.equals("3W"))  { return 190; }

@@ -75,17 +75,23 @@ class DistancePickerDelegate extends WatchUi.BehaviorDelegate {
         _shotData["distance"]  = _view.distance;
         _shotData["timestamp"] = Time.now().value();
 
-        ShotHistory.addShot(_shotData);
-
-        // Don't pop — confirmation sits on top, dismisses back here
+        // Every shot is classified before it is stored, so quality data is
+        // available for both ad-hoc logging and driving-range summaries.
         WatchUi.pushView(
-            new ConfirmationView(
-                _shotData["club"] as Lang.String,
-                _view.distance
-            ),
-            new ConfirmationDelegate(),
+            new ShotQualityMenu(),
+            new ShotQualityDelegate(_shotData),
             WatchUi.SLIDE_UP
         );
         return true;
+    }
+
+    function onBack() as Lang.Boolean {
+        if (_shotData.hasKey("rangeShot")) {
+            getApp().cancelRangeShotPrompt();
+            WatchUi.popView(WatchUi.SLIDE_IMMEDIATE); // distance picker
+            WatchUi.popView(WatchUi.SLIDE_IMMEDIATE); // club menu
+            return true;
+        }
+        return false;
     }
 }

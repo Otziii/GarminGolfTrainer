@@ -1,0 +1,15 @@
+<resources xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://developer.garmin.com/downloads/connect-iq/resources.xsd">
+    <fitContributions>
+        <fitField id="0" displayInActivitySummary="true" sortOrder="0" precision="0" dataLabel="@Strings.FitShots" unitLabel="@Strings.UnitShots" />
+        <fitField id="1" displayInActivitySummary="true" sortOrder="1" precision="0" dataLabel="@Strings.FitSolidShots" unitLabel="@Strings.UnitShots" />
+        <fitField id="2" displayInActivitySummary="true" sortOrder="2" precision="0" dataLabel="@Strings.FitSolidPercent" unitLabel="@Strings.UnitPercent" />
+        <fitField id="3" displayInActivitySummary="true" sortOrder="3" precision="0" dataLabel="@Strings.FitAverageDistance" unitLabel="@Strings.UnitDistance" />
+        <fitField id="4" displayInActivitySummary="true" sortOrder="4" precision="0" dataLabel="@Strings.FitSliceCount" unitLabel="@Strings.UnitShots" />
+        <fitField id="5" displayInActivitySummary="true" sortOrder="5" precision="0" dataLabel="@Strings.FitPullCount" unitLabel="@Strings.UnitShots" />
+        <fitField id="6" displayInActivitySummary="true" sortOrder="6" precision="0" dataLabel="@Strings.FitDuffCount" unitLabel="@Strings.UnitShots" />
+        <fitField id="7" displayInActivitySummary="true" sortOrder="7" precision="0" dataLabel="@Strings.FitThinCount" unitLabel="@Strings.UnitShots" />
+        <fitField id="8" displayInActivitySummary="true" sortOrder="8" precision="0" dataLabel="@Strings.FitShankCount" unitLabel="@Strings.UnitShots" />
+        <fitField id="9" displayInActivitySummary="true" sortOrder="9" precision="0" dataLabel="@Strings.FitAverageHeartRate" unitLabel="@Strings.UnitBpm" />
+        <fitField id="10" displayInActivitySummary="true" sortOrder="10" precision="0" dataLabel="@Strings.FitMaxHeartRate" unitLabel="@Strings.UnitBpm" />
+    </fitContributions>
+</resources>

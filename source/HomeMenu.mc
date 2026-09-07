@@ -5,6 +5,7 @@ class HomeMenuView extends WatchUi.Menu2 {
 
     function initialize() {
         Menu2.initialize({ :title => "Golf Trainer" });
+        addItem(new WatchUi.MenuItem("Start Range", null, :startRange, {}));
         addItem(new WatchUi.MenuItem("Log Shot",  null, :logShot,  {}));
         addItem(new WatchUi.MenuItem("History",   null, :history,  {}));
         addItem(new WatchUi.MenuItem("Settings",  null, :settings, {}));
@@ -20,7 +21,16 @@ class HomeMenuDelegate extends WatchUi.Menu2InputDelegate {
     function onSelect(item as WatchUi.MenuItem) as Void {
         var id = item.getId();
 
-        if (id == :logShot) {
+        if (id == :startRange) {
+            if (getApp().startRangeSession()) {
+                var rangeView = new RangeActivityView();
+                WatchUi.pushView(
+                    rangeView,
+                    new RangeActivityDelegate(rangeView),
+                    WatchUi.SLIDE_LEFT
+                );
+            }
+        } else if (id == :logShot) {
             WatchUi.pushView(
                 new ClubMenu(),
                 new ClubDelegate({} as Lang.Dictionary),
