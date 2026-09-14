@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <iq:manifest xmlns:iq="http://www.garmin.com/xml/connectiq" version="3">
-    <iq:application entry="GarminGolfTrainerApp" id="a2e3b6c8-4f1d-4a2e-9c3b-7e8f5d6a1b0c" launcherIcon="@Drawables.LauncherIcon" minSdkVersion="3.2.0" name="@Strings.AppName" type="watch-app" version="1.0.0">
+    <iq:application entry="GarminGolfTrainerApp" id="a2e3b6c8-4f1d-4a2e-9c3b-7e8f5d6a1b0c" launcherIcon="@Drawables.LauncherIcon" minSdkVersion="3.2.0" name="@Strings.AppName" type="watch-app" version="1.1.0">
         <iq:products>
             <iq:product id="fenix8solar47mm"/>
         </iq:products>

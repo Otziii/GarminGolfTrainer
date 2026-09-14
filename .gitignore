@@ -4,6 +4,9 @@ bin/
 *.prg.debug
 *.iq
 
+# Compiled sideload helper (source is tracked, binary is not)
+/tools/mtpsend
+
 # IDE / editor files
 .vscode/settings.json
 *.swp
