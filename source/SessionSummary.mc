@@ -19,15 +19,20 @@ class SessionSummaryView extends WatchUi.View {
         if (_shots.size() == 0) { return; }
 
         var totalDistance = 0;
+        var measured = 0;
         var misses = {} as Lang.Dictionary;
         for (var i = 0; i < _shots.size(); i++) {
             var shot = _shots[i] as Lang.Dictionary;
-            totalDistance += shot["distance"] as Lang.Number;
-            var quality = shot.get("quality") as Lang.Symbol?;
-            if (quality != null && quality == :solid) {
+            var distance = shot.get("distance") as Lang.Number?;
+            if (distance != null) {
+                totalDistance += distance;
+                measured += 1;
+            }
+            var quality = shot.get("quality") as Lang.String?;
+            if (quality != null && quality.equals("solid")) {
                 _solidCount += 1;
             } else if (quality != null) {
-                var label = quality.toString();
+                var label = qualityLabel(quality);
                 var count = misses.hasKey(label) ? misses[label] as Lang.Number : 0;
                 misses[label] = count + 1;
                 if ((count + 1) > _topMissCount) {
@@ -36,46 +41,50 @@ class SessionSummaryView extends WatchUi.View {
                 }
             }
         }
-        _average = (totalDistance / _shots.size()).toNumber();
+        _average = measured > 0 ? (totalDistance / measured).toNumber() : 0;
     }
 
     function onUpdate(dc as Graphics.Dc) as Void {
-        var w = dc.getWidth();
         var h = dc.getHeight();
-        var cx = w / 2;
-        var cy = h / 2;
+        var count = _shots.size();
 
         dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
         dc.clear();
-        dc.setColor(Graphics.COLOR_GREEN, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, cy - (h * 0.40).toNumber(), Graphics.FONT_MEDIUM,
-            "RANGE SUMMARY", Graphics.TEXT_JUSTIFY_CENTER);
-
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, cy - (h * 0.22).toNumber(), Graphics.FONT_LARGE,
-            _shots.size().toString() + " SHOTS", Graphics.TEXT_JUSTIFY_CENTER);
 
         dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, cy - (h * 0.02).toNumber(), Graphics.FONT_SMALL,
-            "AVG " + _average.toString() + " " + ShotHistory.getUnitText(),
-            Graphics.TEXT_JUSTIFY_CENTER);
+        Layout.drawFitted(dc, (h * 0.14).toNumber(),
+            [Graphics.FONT_XTINY] as Lang.Array, "RANGE SUMMARY");
 
-        dc.drawText(cx, cy + (h * 0.15).toNumber(), Graphics.FONT_SMALL,
-            "SOLID " + _solidCount.toString() + "/" + _shots.size().toString(),
-            Graphics.TEXT_JUSTIFY_CENTER);
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        Layout.drawFitted(dc, (h * 0.30).toNumber(),
+            [Graphics.FONT_NUMBER_MEDIUM, Graphics.FONT_LARGE] as Lang.Array,
+            count.toString() + (count == 1 ? " shot" : " shots"));
+
+        dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
+        Layout.drawFitted(dc, (h * 0.47).toNumber(),
+            [Graphics.FONT_SMALL, Graphics.FONT_TINY] as Lang.Array,
+            _average > 0
+                ? "Avg " + _average.toString() + " " + ShotHistory.getUnitText()
+                : "No distances logged");
+
+        Layout.drawFitted(dc, (h * 0.60).toNumber(),
+            [Graphics.FONT_SMALL, Graphics.FONT_TINY] as Lang.Array,
+            "Solid " + _solidCount.toString() + "/" + count.toString());
 
         var averageHr = getApp().getAverageHeartRate();
         var maxHr = getApp().getMaxHeartRate();
-        var hrText = averageHr == null ? "HR --" : "HR " + averageHr.toString() + "/" + maxHr.toString() + " BPM";
-        dc.drawText(cx, cy + (h * 0.26).toNumber(), Graphics.FONT_XTINY,
-            hrText, Graphics.TEXT_JUSTIFY_CENTER);
-
         dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
-        var missText = _topMissCount > 0 ? "TOP MISS: " + _topMiss + " (" + _topMissCount.toString() + ")" : "NO MISSES TAGGED";
-        dc.drawText(cx, cy + (h * 0.36).toNumber(), Graphics.FONT_XTINY,
-            missText, Graphics.TEXT_JUSTIFY_CENTER);
-        dc.drawText(cx, cy + (h * 0.45).toNumber(), Graphics.FONT_XTINY,
-            "SELECT OR BACK TO CLOSE", Graphics.TEXT_JUSTIFY_CENTER);
+        Layout.drawFitted(dc, (h * 0.72).toNumber(),
+            [Graphics.FONT_XTINY] as Lang.Array,
+            averageHr == null
+                ? "HR --"
+                : "HR " + averageHr.toString() + " / " + maxHr.toString() + " bpm");
+
+        Layout.drawFitted(dc, (h * 0.84).toNumber(),
+            [Graphics.FONT_XTINY] as Lang.Array,
+            _topMissCount > 0
+                ? "Top miss: " + _topMiss + " (" + _topMissCount.toString() + ")"
+                : "No misses tagged");
     }
 }
 
@@ -85,8 +94,7 @@ class SessionSummaryDelegate extends WatchUi.BehaviorDelegate {
     }
 
     function onSelect() as Lang.Boolean {
-        WatchUi.popView(WatchUi.SLIDE_IMMEDIATE); // summary
-        WatchUi.popView(WatchUi.SLIDE_IMMEDIATE); // stopped range screen
+        WatchUi.popView(WatchUi.SLIDE_DOWN);
         return true;
     }
 

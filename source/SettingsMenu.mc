@@ -1,13 +1,28 @@
 import Toybox.Lang;
 import Toybox.WatchUi;
 
+// Labels live outside the view so the delegate can rewrite them in place after
+// a toggle. Rebuilding the menu instead would reset focus to the first item.
+function unitsLabel() as Lang.String {
+    return ShotHistory.isMetric() ? "Units: Metric" : "Units: Imperial";
+}
+
+function logShotsLabel() as Lang.String {
+    return ShotHistory.shouldLogShots() ? "Log Shots: On" : "Log Shots: Off";
+}
+
+function shotLengthLabel() as Lang.String {
+    return ShotHistory.shouldLogDistance() ? "Shot Length: On" : "Shot Length: Off";
+}
+
 class SettingsMenuView extends WatchUi.Menu2 {
 
     function initialize() {
         Menu2.initialize({ :title => "Settings" });
-        var unitsLabel = ShotHistory.isMetric() ? "Units: Metric" : "Units: Imperial";
-        addItem(new WatchUi.MenuItem(unitsLabel,    null, :toggleUnits, {}));
-        addItem(new WatchUi.MenuItem("Clear Stats", null, :clearStats,  {}));
+        addItem(new WatchUi.MenuItem(unitsLabel(),      null, :toggleUnits,    {}));
+        addItem(new WatchUi.MenuItem(logShotsLabel(),   null, :toggleLogShots, {}));
+        addItem(new WatchUi.MenuItem(shotLengthLabel(), null, :toggleLogDist,  {}));
+        addItem(new WatchUi.MenuItem("Clear Stats",     null, :clearStats,     {}));
     }
 }
 
@@ -21,21 +36,20 @@ class SettingsMenuDelegate extends WatchUi.Menu2InputDelegate {
         var id = item.getId();
 
         if (id == :toggleUnits) {
-            if (ShotHistory.isMetric()) {
-                ShotHistory.setUnits("imperial");
-            } else {
-                ShotHistory.setUnits("metric");
-            }
-            // Pop and re-push to refresh the label
-            WatchUi.popView(WatchUi.SLIDE_IMMEDIATE);
-            WatchUi.pushView(
-                new SettingsMenuView(),
-                new SettingsMenuDelegate(),
-                WatchUi.SLIDE_IMMEDIATE
-            );
+            ShotHistory.setUnits(ShotHistory.isMetric() ? "imperial" : "metric");
+            item.setLabel(unitsLabel());
+        } else if (id == :toggleLogShots) {
+            ShotHistory.setLogShots(!ShotHistory.shouldLogShots());
+            item.setLabel(logShotsLabel());
+        } else if (id == :toggleLogDist) {
+            ShotHistory.setLogDistance(!ShotHistory.shouldLogDistance());
+            item.setLabel(shotLengthLabel());
         } else if (id == :clearStats) {
             ShotHistory.clearAll();
             WatchUi.popView(WatchUi.SLIDE_DOWN);
+            return;
         }
+
+        WatchUi.requestUpdate();
     }
 }

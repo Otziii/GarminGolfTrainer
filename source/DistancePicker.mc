@@ -72,14 +72,14 @@ class DistancePickerDelegate extends WatchUi.BehaviorDelegate {
     }
 
     function onSelect() as Lang.Boolean {
-        _shotData["distance"]  = _view.distance;
-        _shotData["timestamp"] = Time.now().value();
+        _shotData["distance"] = _view.distance;
 
         // Every shot is classified before it is stored, so quality data is
         // available for both ad-hoc logging and driving-range summaries.
+        // Three views to unwind afterwards: quality, this picker, club menu.
         WatchUi.pushView(
             new ShotQualityMenu(),
-            new ShotQualityDelegate(_shotData),
+            new ShotQualityDelegate(_shotData, 3),
             WatchUi.SLIDE_UP
         );
         return true;

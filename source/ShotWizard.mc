@@ -28,6 +28,18 @@ class ClubDelegate extends WatchUi.Menu2InputDelegate {
 
     function onSelect(item as WatchUi.MenuItem) as Void {
         _shotData["club"] = item.getId() as Lang.String;
+
+        if (!ShotHistory.shouldLogDistance()) {
+            // Straight to quality; the shot is stored without a distance.
+            // Two views to unwind afterwards: quality and this club menu.
+            WatchUi.pushView(
+                new ShotQualityMenu(),
+                new ShotQualityDelegate(_shotData, 2),
+                WatchUi.SLIDE_UP
+            );
+            return;
+        }
+
         var defaultDist = defaultDistanceForClub(_shotData["club"] as Lang.String);
         var pickerView = new DistancePickerView(_shotData, defaultDist);
         WatchUi.pushView(

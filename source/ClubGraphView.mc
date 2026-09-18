@@ -27,8 +27,9 @@ class ClubGraphView extends WatchUi.View {
         var result = [] as Lang.Array;
         for (var i = 0; i < all.size(); i++) {
             var shot = all[i] as Lang.Dictionary;
-            if ((shot.get("club") as Lang.String).equals(club)) {
-                result.add(shot.get("distance") as Lang.Number);
+            var distance = shot.get("distance") as Lang.Number?;
+            if (distance != null && (shot.get("club") as Lang.String).equals(club)) {
+                result.add(distance);
             }
         }
         return result;

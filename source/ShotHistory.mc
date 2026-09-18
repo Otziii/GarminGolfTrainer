@@ -5,6 +5,8 @@ module ShotHistory {
 
     const KEY = "shots";
     const KEY_UNITS = "units";
+    const KEY_LOG_SHOTS = "logShots";
+    const KEY_LOG_DISTANCE = "logDistance";
 
     function addShot(shot as Lang.Dictionary) as Void {
         var shots = getShots();
@@ -69,6 +71,29 @@ module ShotHistory {
 
     function getUnitText() as Lang.String {
         return isMetric() ? "meters" : "yards";
+    }
+
+    // Controls shot logging during a range session: both swing-detected
+    // prompts and the manual SELECT action. The home menu's explicit
+    // "Log Shot" is a deliberate user action and stays available either way.
+    function shouldLogShots() as Lang.Boolean {
+        var stored = Application.Storage.getValue(KEY_LOG_SHOTS);
+        return stored != null ? stored as Lang.Boolean : true;
+    }
+
+    function setLogShots(enabled as Lang.Boolean) as Void {
+        Application.Storage.setValue(KEY_LOG_SHOTS, enabled);
+    }
+
+    // When off, the distance picker is skipped and shots are stored without
+    // a "distance" key. Every consumer treats that as "unknown", not zero.
+    function shouldLogDistance() as Lang.Boolean {
+        var stored = Application.Storage.getValue(KEY_LOG_DISTANCE);
+        return stored != null ? stored as Lang.Boolean : true;
+    }
+
+    function setLogDistance(enabled as Lang.Boolean) as Void {
+        Application.Storage.setValue(KEY_LOG_DISTANCE, enabled);
     }
 
     function clearAll() as Void {

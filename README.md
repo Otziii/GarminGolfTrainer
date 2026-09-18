@@ -1,6 +1,15 @@
 # GarminGolfTrainer
 
 A Garmin Connect IQ watch app for golf range training, built with Monkey C.
+It presents itself as **Driving Range** on the watch and imitates a native
+activity: a pre-start screen, paged data screens while recording, and a
+START/STOP menu offering Resume, Save and Discard.
+
+The project directory, class names and `.prg` filename keep the original
+GarminGolfTrainer name. The filename in particular is load-bearing: the watch
+names a sideloaded app's data store after it (`GARMIN/Apps/DATA/
+GarminGolfTrainer.*`), so renaming the binary would orphan existing shot
+history.
 
 ## Prerequisites
 
@@ -19,8 +28,11 @@ GarminGolfTrainer/
 ├── manifest.xml                # App id, permissions, target device
 ├── monkey.jungle               # Build configuration
 ├── source/
-│   ├── GarminGolfTrainerApp.mc # Application entry point
-│   ├── HomeMenu.mc             # Root menu
+│   ├── GarminGolfTrainerApp.mc # Application entry point, session lifecycle
+│   ├── PreStartView.mc         # Pre-start screen (START begins recording)
+│   ├── PreStartMenu.mc         # Hold MENU on pre-start
+│   ├── StopMenu.mc             # Resume / Save / Discard
+│   ├── Layout.mc               # Round-screen text fitting helpers
 │   ├── RangeActivity.mc        # Recording session + FIT activity
 │   ├── ShotWizard.mc           # Per-shot entry flow
 │   ├── ShotQualityMenu.mc      # Strike quality picker
@@ -88,7 +100,7 @@ tools/install.sh
 
 That builds a signed release `.prg`, closes anything holding the USB interface,
 pushes the app to `GARMIN/Apps`, and verifies it arrived. Then unplug the watch
-and press **START** — "Golf Trainer" is in the activity list. First launch
+and press **START** — "Driving Range" is in the activity list. First launch
 prompts for the sensor and FIT permissions declared in `manifest.xml`.
 
 The `.prg` disappears from `GARMIN/Apps` on the next connect. The watch has
@@ -125,6 +137,38 @@ tools/mtpsend get     16779627 ./copy.prg  # pull a file back off the watch
 
 `send` replaces any same-named file first; MTP otherwise allows duplicates in
 one folder, which piles up stale copies across reinstalls.
+
+## Controls
+
+Key mapping mirrors a native activity:
+
+| Key | Pre-start | Recording |
+|---|---|---|
+| START/STOP (upper right) | Begin activity | Pause, then stop menu |
+| BACK (lower right) | Exit app | Log a shot (the lap key) |
+| UP / DOWN, swipe up/down | — | Change data screen |
+| hold MENU | History, Log Shot, Settings | Activity settings (no pause) |
+| tap / left-right swipe | Ignored | Ignored |
+
+This follows the fenix 8 owner's manual: the upper-right button starts and
+stops the timer, the lower-right button records a lap, and up/down or a
+vertical swipe changes data screen. The stop menu uses Garmin's own wording
+and ordering (Resume, Save, Discard); the rest of the native menu -- Next
+Activity, Resume Later, TracBack, Recovery Heart Rate -- needs platform
+features Connect IQ does not expose to apps.
+
+### Touch is handled at key level, deliberately
+
+`fenix8solar47mm`'s device profile maps `tap -> onSelect` and
+`swipeRight -> onBack`. A `BehaviorDelegate` that implements `onSelect` and
+`onBack` therefore turns a brushed screen into a stopped activity and a right
+swipe into a stray shot. The activity and pre-start delegates handle
+`onKey` instead, matching on `KEY_ENTER` and `KEY_ESC`, and swallow `onTap`
+and horizontal swipes.
+
+`getSettingsView()` is not an option for this app: the SDK restricts it to
+watch faces and data fields, so settings live behind hold-MENU instead, which
+is where native activities keep them anyway.
 
 ## Troubleshooting
 

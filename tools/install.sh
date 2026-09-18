@@ -56,7 +56,7 @@ tools/mtpsend list "$APPS_DIR" | grep -i "$REMOTE_NAME" \
 
 cat <<'DONE'
 
-Done. Unplug the watch, press START, and pick "Golf Trainer" from the list.
+Done. Unplug the watch, press START, and pick "Driving Range" from the list.
 The .prg disappears from GARMIN/Apps on the next connect -- the watch moves it
 into internal storage. That is normal, not a failed install.
 DONE

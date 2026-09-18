@@ -17,9 +17,14 @@ class GarminGolfTrainerApp extends Application.AppBase {
 
     private var _rangeSession as ActivityRecording.Session?;
     private var _rangeRunning as Lang.Boolean = false;
+    private var _rangePaused as Lang.Boolean = false;
     private var _awaitingShotInput as Lang.Boolean = false;
     private var _lastShotMillis as Lang.Number = 0;
-    private var _rangeStartMillis as Lang.Number = 0;
+    // Elapsed time is accumulated across pauses rather than derived from a
+    // single start stamp, so the timer freezes in the stop menu like a
+    // native activity does.
+    private var _elapsedAccumMs as Lang.Number = 0;
+    private var _resumeMillis as Lang.Number = 0;
     private var _rangeShotCount as Lang.Number = 0;
     private var _rangeShots as Lang.Array = [];
     private var _fitFields as Lang.Dictionary = {};
@@ -33,7 +38,7 @@ class GarminGolfTrainerApp extends Application.AppBase {
     }
 
     function getInitialView() {
-        return [new HomeMenuView(), new HomeMenuDelegate()];
+        return [new PreStartView(), new PreStartDelegate()];
     }
 
     function startRangeSession() as Lang.Boolean {
@@ -55,6 +60,7 @@ class GarminGolfTrainerApp extends Application.AppBase {
             Sensor.enableSensorEvents(method(:onSensorInfo));
 
             _rangeRunning = true;
+            _rangePaused = false;
             _awaitingShotInput = false;
             _rangeShotCount = 0;
             _rangeShots = [];
@@ -63,7 +69,8 @@ class GarminGolfTrainerApp extends Application.AppBase {
             _maxHeartRate = 0;
             _currentHeartRate = null;
             _lastShotMillis = System.getTimer();
-            _rangeStartMillis = System.getTimer();
+            _elapsedAccumMs = 0;
+            _resumeMillis = System.getTimer();
             return true;
         } catch (e) {
             System.println("Could not start range: " + e.getErrorMessage());
@@ -78,9 +85,40 @@ class GarminGolfTrainerApp extends Application.AppBase {
         }
     }
 
-    function stopRangeSession() as Void {
-        if (!_rangeRunning) { return; }
+    // Recording pauses while the stop menu is open, matching native activities
+    // where the timer holds until you choose Resume, Save or Discard.
+    function pauseRangeSession() as Void {
+        if (!_rangeRunning || _rangePaused) { return; }
+        _elapsedAccumMs += System.getTimer() - _resumeMillis;
+        _rangePaused = true;
+        try {
+            if (_rangeSession != null) { _rangeSession.stop(); }
+        } catch (e) {
+            System.println("Could not pause range: " + e.getErrorMessage());
+        }
+    }
 
+    function resumeRangeSession() as Void {
+        if (!_rangeRunning || !_rangePaused) { return; }
+        _resumeMillis = System.getTimer();
+        _rangePaused = false;
+        try {
+            if (_rangeSession != null) { _rangeSession.start(); }
+        } catch (e) {
+            System.println("Could not resume range: " + e.getErrorMessage());
+        }
+    }
+
+    function isRangePaused() as Lang.Boolean {
+        return _rangePaused;
+    }
+
+    function isRangeRunning() as Lang.Boolean {
+        return _rangeRunning;
+    }
+
+    function saveRangeSession() as Void {
+        if (!_rangeRunning) { return; }
         try {
             Sensor.unregisterSensorDataListener();
             Sensor.enableSensorEvents(null);
@@ -92,10 +130,29 @@ class GarminGolfTrainerApp extends Application.AppBase {
         } catch (e) {
             System.println("Could not save range: " + e.getErrorMessage());
         }
+        clearRangeState();
+    }
 
+    function discardRangeSession() as Void {
+        if (!_rangeRunning) { return; }
+        try {
+            Sensor.unregisterSensorDataListener();
+            Sensor.enableSensorEvents(null);
+            if (_rangeSession != null) {
+                _rangeSession.stop();
+                _rangeSession.discard();
+            }
+        } catch (e) {
+            System.println("Could not discard range: " + e.getErrorMessage());
+        }
+        clearRangeState();
+    }
+
+    private function clearRangeState() as Void {
         _rangeSession = null;
         _fitFields = {};
         _rangeRunning = false;
+        _rangePaused = false;
         _awaitingShotInput = false;
     }
 
@@ -105,7 +162,9 @@ class GarminGolfTrainerApp extends Application.AppBase {
 
     function getRangeElapsedSeconds() as Lang.Number {
         if (!_rangeRunning) { return 0; }
-        return ((System.getTimer() - _rangeStartMillis) / 1000).toNumber();
+        var elapsed = _elapsedAccumMs;
+        if (!_rangePaused) { elapsed += System.getTimer() - _resumeMillis; }
+        return (elapsed / 1000).toNumber();
     }
 
     function getRangeShots() as Lang.Array {
@@ -138,7 +197,7 @@ class GarminGolfTrainerApp extends Application.AppBase {
     // Heart rate comes from the watch optical sensor or a connected strap.
     // The event source is separate from the high-rate accelerometer listener.
     function onSensorInfo(sensorInfo as Sensor.Info) as Void {
-        if (!_rangeRunning || sensorInfo.heartRate == null) { return; }
+        if (!_rangeRunning || _rangePaused || sensorInfo.heartRate == null) { return; }
         var heartRate = sensorInfo.heartRate as Lang.Number;
         _currentHeartRate = heartRate;
         _heartRateTotal += heartRate;
@@ -175,19 +234,23 @@ class GarminGolfTrainerApp extends Application.AppBase {
 
     private function writeSessionFitSummary() as Void {
         var totalDistance = 0;
+        var measured = 0;
         var solid = 0;
         var counts = { "slice" => 0, "pull" => 0, "duff" => 0, "thin" => 0, "shank" => 0 } as Lang.Dictionary;
         for (var i = 0; i < _rangeShots.size(); i++) {
             var shot = _rangeShots[i] as Lang.Dictionary;
-            totalDistance += shot["distance"] as Lang.Number;
-            var quality = shot.get("quality") as Lang.Symbol?;
-            if (quality == :solid) {
+            var distance = shot.get("distance") as Lang.Number?;
+            if (distance != null) {
+                totalDistance += distance;
+                measured += 1;
+            }
+            var quality = shot.get("quality") as Lang.String?;
+            if (quality == null) {
+                // Nothing to count.
+            } else if (quality.equals("solid")) {
                 solid += 1;
-            } else if (quality != null) {
-                var qualityKey = quality.toString();
-                if (counts.hasKey(qualityKey)) {
-                    counts[qualityKey] = (counts[qualityKey] as Lang.Number) + 1;
-                }
+            } else if (counts.hasKey(quality)) {
+                counts[quality] = (counts[quality] as Lang.Number) + 1;
             }
         }
 
@@ -195,7 +258,7 @@ class GarminGolfTrainerApp extends Application.AppBase {
         setFitField("shots", shots);
         setFitField("solid", solid);
         setFitField("solidPct", shots > 0 ? ((solid * 100) / shots).toNumber() : 0);
-        setFitField("averageDistance", shots > 0 ? (totalDistance / shots).toNumber() : 0);
+        setFitField("averageDistance", measured > 0 ? (totalDistance / measured).toNumber() : 0);
         setFitField("slice", counts["slice"] as Lang.Number);
         setFitField("pull", counts["pull"] as Lang.Number);
         setFitField("duff", counts["duff"] as Lang.Number);
@@ -208,7 +271,8 @@ class GarminGolfTrainerApp extends Application.AppBase {
     // Receives 25 Hz accelerometer batches while a range session is running.
     // The cooldown prevents the follow-through from producing duplicate prompts.
     function onSensorData(sensorData as Sensor.SensorData) as Void {
-        if (!_rangeRunning || _awaitingShotInput) { return; }
+        if (!_rangeRunning || _rangePaused || _awaitingShotInput) { return; }
+        if (!ShotHistory.shouldLogShots()) { return; }
 
         var accel = sensorData.accelerometerData;
         if (accel == null || accel.x == null || accel.y == null || accel.z == null) {

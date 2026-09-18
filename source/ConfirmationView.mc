@@ -20,6 +20,17 @@ function fullClubName(short as Lang.String) as Lang.String {
     return short;
 }
 
+// Quality ids are stored lowercase; menus and summaries show them capitalised.
+function qualityLabel(quality as Lang.String) as Lang.String {
+    if (quality.equals("solid")) { return "Solid"; }
+    if (quality.equals("slice")) { return "Slice"; }
+    if (quality.equals("pull"))  { return "Pull"; }
+    if (quality.equals("duff"))  { return "Duff"; }
+    if (quality.equals("thin"))  { return "Thin"; }
+    if (quality.equals("shank")) { return "Shank"; }
+    return quality;
+}
+
 class ConfirmationView extends WatchUi.View {
 
     private var _club     as Lang.String;

@@ -15,6 +15,7 @@
 #include <string.h>
 #include <strings.h>
 #include <sys/stat.h>
+#include <time.h>
 #include <libmtp.h>
 
 static int progress(uint64_t sent, uint64_t total, void const *const data) {
@@ -91,8 +92,13 @@ static int cmd_list(LIBMTP_mtpdevice_t *dev, const char *spec) {
     LIBMTP_file_t *f = LIBMTP_Get_Files_And_Folders(dev, storage_of(dev), parent);
     if (!f) printf("(empty or unreadable)\n");
     while (f) {
-        printf("%-12u %-40s %10llu  %s\n", f->item_id, f->filename,
-               (unsigned long long)f->filesize,
+        char when[20] = "-";
+        if (f->modificationdate) {
+            struct tm *tm = localtime(&f->modificationdate);
+            if (tm) strftime(when, sizeof when, "%Y-%m-%d %H:%M", tm);
+        }
+        printf("%-12u %-34s %10llu  %-16s %s\n", f->item_id, f->filename,
+               (unsigned long long)f->filesize, when,
                f->filetype == LIBMTP_FILETYPE_FOLDER ? "DIR" : "file");
         LIBMTP_file_t *next = f->next;
         LIBMTP_destroy_file_t(f);
